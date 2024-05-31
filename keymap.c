@@ -1,5 +1,6 @@
 #include QMK_KEYBOARD_H
 #include <stdio.h>
+#include "os_detection.h"
 char wpm_str[10];
 
 enum layers {
@@ -18,40 +19,50 @@ enum keycodes {
     DVORAK,
     PSSWD,
     PSSWD2,
+    BACK,
+    FORWARD,
+    LB, LF, WB, WF
 };
 
 #define L1_ENT LT(_Layer1, KC_ENT)
 #define L2_ENT LT(_Layer2, KC_ENT)
 #define L1_BSPC LT(_Layer1, KC_BSPC)
 #define L2_SPC LT(_Layer2, KC_SPC)
+#define L3_ESC LT(_Layer3, KC_ESC)
+#define L2_ESC LT(_Layer2, KC_ESC)
 #define Layer1 MO(_Layer1)
 #define Layer2 MO(_Layer2)
 #define Layer3 MO(_Layer3)
-#define L3_ESC LT(_Layer3, KC_ESC)
-#define L2_ESC LT(_Layer2, KC_ESC)
-
-#define C_SCLN LCTL_T(KC_SCLN)
-#define A_Q LALT_T(KC_Q)
-#define G_J LGUI_T(KC_J)
-#define S_K LSFT_T(KC_K)
-
-#define S_M LSFT_T(KC_M)
-#define G_W LGUI_T(KC_W)
-#define A_V LALT_T(KC_V)
-#define C_Z LCTL_T(KC_Z)
 
 #define C_Z LCTL_T(KC_Z)
 #define A_X LALT_T(KC_X)
 #define G_C LGUI_T(KC_C)
 #define S_V LSFT_T(KC_V)
-
 #define S_M LSFT_T(KC_M)
 #define G_COMM LGUI_T(KC_COMM)
 #define A_DOT LALT_T(KC_DOT)
 #define C_SLSH LCTL_T(KC_SLSH)
 
+#define C_SCLN LCTL_T(KC_SCLN)
+#define A_Q LALT_T(KC_Q)
+#define G_J LGUI_T(KC_J)
+#define S_K LSFT_T(KC_K)
+#define S_M LSFT_T(KC_M)
+#define G_W LGUI_T(KC_W)
+#define A_V LALT_T(KC_V)
+#define C_Z LCTL_T(KC_Z)
+
 #define S_D LSFT_T(KC_D)
 #define S_H LSFT_T(KC_H)
+
+#define C_L LCTL_T(KC_L)
+#define A_K LALT_T(KC_K)
+#define G_M LGUI_T(KC_M)
+#define S_COMM LSFT_T(KC_COMM)
+#define S_C LSFT_T(KC_C)
+#define G_Z LGUI_T(KC_Z)
+#define A_Y LALT_T(KC_Y)
+#define C_V LCTL_T(KC_V)
 
 #define A_PIPE LALT_T(KC_PIPE)
 #define G_LBRC LGUI_T(KC_LBRC)
@@ -59,12 +70,6 @@ enum keycodes {
 
 #define SS1 SGUI(KC_4)
 #define SS2 SGUI(KC_5)
-
-#define WF A(KC_RIGHT)
-#define WB A(KC_LEFT)
-
-#define LF G(KC_RIGHT)
-#define LB G(KC_LEFT)
 
 #define SF S(KC_RIGHT)
 #define SB S(KC_LEFT)
@@ -74,9 +79,6 @@ enum keycodes {
 
 #define TABLEFT S(C(KC_TAB))
 #define TABRIGHT C(KC_TAB)
-
-#define BACK G(KC_LBRC)
-#define FORWARD G(KC_RBRC)
 
 #define C_GRV LCTL_T(KC_GRV)
 #define C_DEL LCTL_T(KC_DEL)
@@ -116,11 +118,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_Layer2] = LAYOUT_65_with_macro(
-    _______, _______,     _______, _______, _______, _______, SS1,     SS2,        _______, _______, _______, _______,  _______, _______, _______, _______, _______, _______,
-    _______, _______,     _______, KC_BTN1, _______, _______, _______, _______,    _______, BACK,    TABLEFT, TABRIGHT, FORWARD, _______, _______, _______,          _______,
-    _______, _______,     _______, _______, _______, _______, _______, HYPR(KC_G), KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, DLEFT,   DRIGHT,  _______,                   _______,
-    _______, _______,     _______, KC_LCTL, KC_LALT, KC_LGUI, KC_LSFT, _______,    LB,      WB,      WF,      LF,       _______, _______, _______,                   _______,
-    _______, _______,     _______, _______, _______, _______, _______,             _______, _______, _______, _______,  _______, _______, _______,                   _______
+    _______, _______,     _______, _______, _______, _______, SS1,     SS2,        _______, _______, _______, _______,  _______,    _______, _______, _______, _______, _______,
+    _______, _______,     _______, KC_BTN1, _______, _______, _______, _______,    _______, BACK,    TABLEFT, TABRIGHT, FORWARD,    _______, _______, _______,          _______,
+    _______, _______,     _______, _______, _______, _______, _______, HYPR(KC_G), KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, DLEFT,      DRIGHT,  _______,                   _______,
+    _______, _______,     _______, KC_LCTL, KC_LALT, KC_LGUI, KC_LSFT, _______,    LB,      WB,      WF,      LF,       C(KC_DOWN), _______, _______,                   _______,
+    _______, _______,     _______, _______, _______, _______, _______,             _______, _______, _______, _______,  _______,    _______, _______,                   _______
   ),
 
   [_Layer3] = LAYOUT_65_with_macro(
@@ -146,6 +148,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    os_variant_t host_os = detected_host_os();
     switch (keycode) {
         case QWERTY:
             if (record->event.pressed) {
@@ -170,6 +173,80 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case PSSWD2:
             if (record->event.pressed) {
                 SEND_STRING("QadCha1@\n");
+            }
+            return false;
+        case BACK:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LGUI);
+                    tap_code(KC_LBRC);
+                    unregister_code(KC_LGUI);
+                } else {
+                    register_code(KC_LALT);
+                    tap_code(KC_LEFT);
+                    unregister_code(KC_LALT);
+                }
+            }
+            return false;
+        case FORWARD:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LGUI);
+                    tap_code(KC_RBRC);
+                    unregister_code(KC_LGUI);
+                } else {
+                    register_code(KC_LALT);
+                    tap_code(KC_RIGHT);
+                    unregister_code(KC_LALT);
+                }
+            }
+            return false;
+        case LB:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LGUI);
+                    tap_code(KC_LEFT);
+                    unregister_code(KC_LGUI);
+                } else {
+                    tap_code(KC_HOME);
+                }
+            }
+            return false;
+        case LF:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LGUI);
+                    tap_code(KC_RIGHT);
+                    unregister_code(KC_LGUI);
+                } else {
+                    tap_code(KC_END);
+                }
+            }
+            return false;
+        case WB:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LALT);
+                    tap_code(KC_LEFT);
+                    unregister_code(KC_LALT);
+                } else {
+                    register_code(KC_LCTL);
+                    tap_code(KC_LEFT);
+                    unregister_code(KC_LCTL);
+                }
+            }
+            return false;
+        case WF:
+            if (record->event.pressed) {
+                if (host_os == OS_MACOS || host_os == OS_IOS) {
+                    register_code(KC_LALT);
+                    tap_code(KC_RIGHT);
+                    unregister_code(KC_LALT);
+                } else {
+                    register_code(KC_LCTL);
+                    tap_code(KC_RIGHT);
+                    unregister_code(KC_LCTL);
+                }
             }
             return false;
     }
